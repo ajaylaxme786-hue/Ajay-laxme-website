@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ajay Laxme | Official</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet">
+
+<style>
+body{
+margin:0;
+font-family:'Poppins',sans-serif;
+background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+color:white;
+}
+
+.logo{
+text-align:center;
+font-size:28px;
+font-weight:900;
+padding:15px;
+background:rgba(255,255,255,0.1);
+}
+
+.datetime{
+text-align:center;
+font-size:13px;
+opacity:0.8;
+margin-bottom:5px;
+}
+
+.top-nav{
+display:flex;
+justify-content:space-around;
+background:rgba(255,255,255,0.1);
+padding:10px 0;
+}
+
+.nav-item{
+flex:1;
+text-align:center;
+cursor:pointer;
+font-weight:bold;
+}
+
+.section{
+display:none;
+padding:15px;
+}
+
+.active{
+display:block;
+}
+
+.card{
+background:rgba(255,255,255,0.1);
+padding:15px;
+margin-bottom:15px;
+border-radius:15px;
+}
+
+.search-box{
+display:flex;
+align-items:center;
+margin-bottom:15px;
+}
+
+.search-box input{
+flex:1;
+padding:10px;
+border-radius:20px;
+border:none;
+outline:none;
+}
+
+.mic{
+margin-left:8px;
+font-size:20px;
+}
+
+textarea,input[type="file"]{
+width:100%;
+padding:10px;
+margin-bottom:10px;
+border-radius:10px;
+border:none;
+}
+
+button{
+padding:8px 15px;
+border-radius:20px;
+border:none;
+cursor:pointer;
+font-weight:bold;
+}
+
+img{
+width:100%;
+border-radius:10px;
+margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="logo">AJAY LAXME</div>
+<div class="datetime" id="datetime"></div>
+
+<div class="top-nav">
+<div class="nav-item" onclick="showSection('home')">HOME</div>
+<div class="nav-item" onclick="showSection('youtube')">YOUTUBE</div>
+<div class="nav-item" onclick="showSection('news')">NEWS</div>
+<div class="nav-item" onclick="showSection('creator')">CREATOR</div>
+</div>
+
+<!-- HOME -->
+<div id="home" class="section active">
+<div class="search-box">
+<input type="text" placeholder="Search home...">
+<div class="mic"></div>
+</div>
+<h2>Latest Feed</h2>
+<div id="homeFeed"></div>
+</div>
+
+<!-- YOUTUBE -->
+<div id="youtube" class="section">
+<div class="search-box">
+<input type="text" placeholder="Search YouTube...">
+<div class="mic"></div>
+</div>
+
+<div class="card">
+<h3> Gaming Channel</h3>
+<button onclick="window.open('https://youtube.com/@thelootguy_gaming_universe')">Open</button>
+</div>
+
+<div class="card">
+<h3> Music Channel</h3>
+<button onclick="window.open('https://youtube.com/@audiolibrary5325')">Open</button>
+</div>
+
+<div class="card">
+<h3> Vlogs Channel</h3>
+<button onclick="window.open('https://youtube.com/@laxmexplore101')">Open</button>
+</div>
+
+<div class="card">
+<h3> Personal Vlogs</h3>
+<button onclick="window.open('https://youtube.com/@the_ajay_laxme')">Open</button>
+</div>
+
+</div>
+
+<!-- NEWS -->
+<div id="news" class="section">
+<div class="search-box">
+<input type="text" placeholder="Search news...">
+<div class="mic"></div>
+</div>
+
+<div class="card">
+<h3> Think About News Channel</h3>
+<button onclick="window.open('https://youtube.com/@think_about_01')">Visit</button>
+</div>
+
+</div>
+
+<!-- CREATOR -->
+<div id="creator" class="section">
+<div class="search-box">
+<input type="text" placeholder="Search posts...">
+<div class="mic"></div>
+</div>
+
+<h2>Create Post</h2>
+<textarea id="postText" placeholder="Write something..."></textarea>
+<input type="file" id="imageInput">
+<button onclick="addPost()">Post</button>
+</div>
+
+<script>
+function showSection(id){
+document.querySelectorAll('.section').forEach(sec=>sec.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+}
+
+function updateTime(){
+let now=new Date();
+document.getElementById("datetime").innerText=
+now.toDateString()+" | "+now.toLocaleTimeString();
+}
+setInterval(updateTime,1000);
+updateTime();
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCHUXSw_Wf3mQ2uWwmn2ImWFyRgZEP96AU",
+  authDomain: "ajay-laxme-official.firebaseapp.com",
+  projectId: "ajay-laxme-official",
+  storageBucket: "ajay-laxme-official.firebasestorage.app",
+  messagingSenderId: "1087795646397",
+  appId: "1:1087795646397:web:8d6621fabc88ad0d400cd4"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+window.addPost = async function(){
+let text = document.getElementById("postText").value;
+let file = document.getElementById("imageInput").files[0];
+
+if(!text && !file){
+alert("Write something or select image");
+return;
+}
+
+let imageData="";
+
+if(file){
+let reader=new FileReader();
+reader.onload=async function(e){
+imageData=e.target.result;
+await addDoc(collection(db,"posts"),{
+content:text,
+image:imageData,
+created:Date.now()
+});
+loadPosts();
+}
+reader.readAsDataURL(file);
+}else{
+await addDoc(collection(db,"posts"),{
+content:text,
+image:"",
+created:Date.now()
+});
+loadPosts();
+}
+
+document.getElementById("postText").value="";
+document.getElementById("imageInput").value="";
+}
+
+async function loadPosts(){
+let snapshot=await getDocs(collection(db,"posts"));
+let container=document.getElementById("homeFeed");
+container.innerHTML="";
+let posts=[];
+snapshot.forEach(doc=>posts.push(doc.data()));
+posts.sort((a,b)=>b.created-a.created);
+posts.forEach(data=>{
+let div=document.createElement("div");
+div.className="card";
+div.innerHTML=`<p>${data.content}</p>`;
+if(data.image){
+div.innerHTML+=`<img src="${data.image}">`;
+}
+container.appendChild(div);
+});
+}
+
+loadPosts();
+</script>
+
+</body>
+</html>
